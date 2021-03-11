@@ -4,11 +4,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.home.HomeFragment">
+    tools:context=".ui.home.HomeFragment"
+    android:orientation="vertical">
 
-    <ListView
-        android:id="@+id/lv_group_list"
+     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="600dp"
+        android:id="@+id/swipe_refresh">
+        <ListView
+            android:id="@+id/lv_group_list"
+            android:layout_width="match_parent"
+            android:layout_height="578dp"
+            android:layout_marginBottom="50dp"></ListView>
+
+
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButton5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="350dp"
+        android:background="@color/teal_200"
+        android:clickable="true"
+        android:src="@android:drawable/ic_input_add" />
 
 </LinearLayout>

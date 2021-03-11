@@ -2,5 +2,26 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create a new group"
+        android:layout_gravity="center"
+        android:textSize="25dp"
+        android:textStyle="bold"/>
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/et_group_name"
+        android:hint="Group name"
+        android:layout_marginTop="30dp"
+        />
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/et_group_description"
+        android:hint="Description of this group"
+        android:layout_marginTop="10dp"
+        />
 
 </LinearLayout>

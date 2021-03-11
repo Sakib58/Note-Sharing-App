@@ -6,6 +6,14 @@ public class Group {
     String name,description,key;
     List<String> members;
 
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
     public String getName() {
         return name;
     }
@@ -30,18 +38,11 @@ public class Group {
         this.members = members;
     }
 
-    public String getKey() {
-        return key;
-    }
 
-    public void setKey(String key) {
-        this.key = key;
-    }
 
-    public Group(String key, String name, String description, List<String> members) {
+    public Group( String name, String description, List<String> members) {
         this.name = name;
         this.description = description;
         this.members = members;
-        this.key = key;
     }
 }

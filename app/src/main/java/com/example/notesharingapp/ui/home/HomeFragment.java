@@ -17,13 +17,17 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.example.notesharingapp.CreateGroupDialog;
 import com.example.notesharingapp.Group;
+import com.example.notesharingapp.GroupListAdapter;
 import com.example.notesharingapp.HomeActivity;
 import com.example.notesharingapp.MainActivity;
 import com.example.notesharingapp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -44,7 +48,10 @@ public class HomeFragment extends Fragment {
     ProgressDialog progressDialog;
     String currentUserEmail = "";
     Context context;
-    List<Group> list;
+    ArrayList<Group> list;
+    List<String> allUsers;
+    FloatingActionButton createGroup;
+    SwipeRefreshLayout swipeRefreshLayout;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -58,6 +65,27 @@ public class HomeFragment extends Fragment {
         context = new MainActivity();
         list = new ArrayList<Group>();
         groupNames = new ArrayList<>();
+        allUsers = new ArrayList<String>();
+        createGroup = root.findViewById(R.id.floatingActionButton5);
+        swipeRefreshLayout = root.findViewById(R.id.swipe_refresh);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getActivity().startActivity(getActivity().getIntent());
+                getActivity().finish();
+                getActivity().overridePendingTransition(0, 0);
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
+
+        createGroup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openGroupCreateDialog();
+
+            }
+        });
+
 
         progressDialog.show();
         
@@ -73,22 +101,40 @@ public class HomeFragment extends Fragment {
                     //Toast.makeText(getContext(), "Success", Toast.LENGTH_SHORT).show();
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         List<String> members = (List<String>) document.getData().get("members");
+                        Group newGroup = new Group(document.getData().get("name").toString(),document.getData().get("description").toString(), (List<String>) document.getData().get("members"));
+                        newGroup.setKey(document.getId());
                         if (members.contains(currentUserEmail)){
-                            list.add(new Group(document.getId(),document.getData().get("name").toString(),document.getData().get("description").toString(), (List<String>) document.getData().get("members")));
+                            list.add(newGroup);
                             groupNames.add(document.getData().get("name").toString());
                         }
 
                     }
+                    GroupListAdapter groupListAdapter = new GroupListAdapter(list,getContext());
                     ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
                             getActivity(), android.R.layout.simple_list_item_1,groupNames
                     );
 
-                    listView.setAdapter(arrayAdapter);
+                    listView.setAdapter(groupListAdapter);
                 }else {
                     Toast.makeText(getContext(), "Something went wrong", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
+        db.collection("users")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()){
+                            for (QueryDocumentSnapshot document : task.getResult()){
+                                allUsers.add(document.getId());
+                            }
+                        }
+                    }
+                });
+
+
 
 
 
@@ -100,7 +146,12 @@ public class HomeFragment extends Fragment {
         });
         return root;
     }
-    
+
+    private void openGroupCreateDialog() {
+        CreateGroupDialog createGroupDialog = new CreateGroupDialog();
+        createGroupDialog.show(getParentFragmentManager(),"create group");
+    }
+
     public void getCurrentUser(){
         SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences(MainActivity.SHARED_PREFS,0);
         currentUserEmail = sharedPreferences.getString(MainActivity.EMAIL,"Not found");

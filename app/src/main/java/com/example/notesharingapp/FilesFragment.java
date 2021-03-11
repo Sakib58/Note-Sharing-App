@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -23,6 +24,8 @@ public class FilesFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private String groupKey;
 
     public FilesFragment() {
         // Required empty public constructor
@@ -53,12 +56,15 @@ public class FilesFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        groupKey = this.getArguments().getString("group_key");
+        //Toast.makeText(getContext(), "First param of files:"+this.getArguments().getString("group_key"), Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_files, container, false);
+        View view = inflater.inflate(R.layout.fragment_files, container, false);
+        return view;
     }
 }
