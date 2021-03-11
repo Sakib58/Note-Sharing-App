@@ -84,6 +84,7 @@ public class GroupListAdapter implements ListAdapter {
                     Toast.makeText(context, subjectData.getKey()+" is clicked", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(context,GroupActivity.class);
                     intent.putExtra("group_key",subjectData.getKey());
+                    intent.putExtra("group_name",subjectData.getName());
                     context.startActivity(intent);
                 }
             });
