@@ -64,7 +64,7 @@ public class FilesFragment extends Fragment{
     private String mParam1;
     private String mParam2;
 
-    private String groupKey;
+    private String groupKey,groupName;
 
     FloatingActionButton btnUploadFile;
     private Uri filepath;
@@ -142,11 +142,13 @@ public class FilesFragment extends Fragment{
         });
         createFile = view.findViewById(R.id.btn_create_file);
         groupKey = this.getArguments().getString("group_key");
+        groupName = this.getArguments().getString("group_name");
         createFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getContext(),CreateFileActivity.class);
                 intent.putExtra("group_key",groupKey);
+                intent.putExtra("group_name",groupName);
                 startActivity(intent);
             }
         });

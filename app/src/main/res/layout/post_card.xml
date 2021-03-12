@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="25dp"
+        android:textStyle="bold"
+        android:id="@+id/tv_post_author"
+        android:text="Hello"
+        android:layout_marginLeft="20dp"
+        />
+
+    <TextView
+        android:id="@+id/tv_post_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/tv_post_author"
+        android:layout_marginBottom="-28dp"
+        android:text="Date"
+        android:textSize="15dp"
+
+        android:textStyle="italic" />
+
+    <TextView
+        android:id="@+id/tv_post_body"
+        android:layout_width="match_parent"
+
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_post_date"
+        android:layout_marginTop="48dp"
+        android:layout_marginBottom="158dp"
+        android:text="Post Body"
+        android:textSize="20dp" />
+
+
+</RelativeLayout>

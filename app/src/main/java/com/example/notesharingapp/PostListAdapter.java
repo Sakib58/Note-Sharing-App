@@ -1,8 +1,6 @@
 package com.example.notesharingapp;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.DataSetObserver;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,16 +8,17 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
-public class GroupListAdapter implements ListAdapter {
-    ArrayList<Group> arrayList;
+public class PostListAdapter implements ListAdapter {
+    ArrayList<Post> posts;
     Context context;
 
-    public GroupListAdapter(ArrayList<Group> arrayList, Context context) {
-        this.arrayList = arrayList;
+    public PostListAdapter(ArrayList<Post> posts, Context context) {
+        this.posts = posts;
         this.context = context;
     }
 
@@ -45,7 +44,7 @@ public class GroupListAdapter implements ListAdapter {
 
     @Override
     public int getCount() {
-        return arrayList.size();
+        return posts.size();
     }
 
     @Override
@@ -65,30 +64,27 @@ public class GroupListAdapter implements ListAdapter {
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
-        Group subjectData=arrayList.get(i);
+        Post subjectData=posts.get(i);
         if(view==null) {
             LayoutInflater layoutInflater = LayoutInflater.from(context);
-            view=layoutInflater.inflate(R.layout.group, null);
+            view=layoutInflater.inflate(R.layout.post_card, null);
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                 }
             });
-            TextView tittle=view.findViewById(R.id.tv_group_title);
-            TextView description = view.findViewById(R.id.tv_group_description);
+            TextView author=view.findViewById(R.id.tv_post_author);
+            TextView body = view.findViewById(R.id.tv_post_body);
+            TextView createdAt = view.findViewById(R.id.tv_post_date);
             LinearLayout linearLayout = view.findViewById(R.id.ll_each_group);
-            tittle.setText(subjectData.getName());
-            description.setText(subjectData.getDescription());
-            linearLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Toast.makeText(context, subjectData.getKey()+" is clicked", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(context,GroupActivity.class);
-                    intent.putExtra("group_key",subjectData.getKey());
-                    intent.putExtra("group_name",subjectData.getName());
-                    context.startActivity(intent);
-                }
-            });
+            author.setText(subjectData.getAuthor());
+            SimpleDateFormat sfd = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+            Date date = subjectData.getTime().toDate();
+
+            //String dateTime = sfd.format(date);
+            createdAt.setText(sfd.format(date));
+            body.setText(subjectData.getBody());
+
 
         }
         return view;

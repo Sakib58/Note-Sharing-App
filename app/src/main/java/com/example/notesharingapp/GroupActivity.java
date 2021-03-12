@@ -64,6 +64,12 @@ public class GroupActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences(MainActivity.SHARED_PREFS,0);
         currentUserEmail = sharedPreferences.getString(MainActivity.EMAIL,"");
 
+        SharedPreferences sharedPreferences1 = getSharedPreferences("group_info",0);
+        SharedPreferences.Editor editor = sharedPreferences1.edit();
+        editor.putString("group_name",getIntent().getStringExtra("group_name"));
+        editor.putString("group_key",getIntent().getStringExtra("group_key"));
+
+
         db = FirebaseFirestore.getInstance();
         db.collection("users")
                 .get()

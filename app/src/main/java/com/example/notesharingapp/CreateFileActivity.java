@@ -9,9 +9,11 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Path;
@@ -42,12 +44,18 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
@@ -71,7 +79,11 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Locale;
+
+import static android.os.Environment.DIRECTORY_DOCUMENTS;
+import static android.os.Environment.getExternalStoragePublicDirectory;
 
 public class CreateFileActivity extends AppCompatActivity {
 
@@ -79,6 +91,7 @@ public class CreateFileActivity extends AppCompatActivity {
 
     EditText mResultsET;
     ImageView mPreviewIV;
+    TextView pdfName;
 
     public String dataFormat = "Text";
 
@@ -109,7 +122,15 @@ public class CreateFileActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private static final int requestPermissionID = 101;
 
+    String filename;
+
     int count = 0;
+
+    String groupKey,groupName;
+
+    FirebaseStorage storage;
+    StorageReference storageReference;
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,21 +140,21 @@ public class CreateFileActivity extends AppCompatActivity {
         mResultsET=findViewById(R.id.resultEt);
         mPreviewIV=findViewById(R.id.imageIv);
 
-        document = new Document();
-        String mFilename = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(System.currentTimeMillis());
-        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
-        File file = new File(path, mFilename+".pdf");
-        try {
-            PdfWriter.getInstance(document,new FileOutputStream(file));
+        pdfName = findViewById(R.id.pdf_name);
 
-        } catch (DocumentException e) {
-            Toast.makeText(this, "Document exception:"+e.getMessage(), Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            Toast.makeText(this, "File not found:"+e.getMessage(), Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-        }
-        document.open();
+        progressDialog = new ProgressDialog(this);
+
+        storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
+
+
+        SharedPreferences sharedPreferences = getSharedPreferences("group_info",0);
+        groupName = sharedPreferences.getString("group_name"," ");
+        groupKey = sharedPreferences.getString("group_key"," ");
+
+
+
+        setPdfName();
 
 
         cameraPermission=new String[] {Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE};
@@ -155,6 +176,7 @@ public class CreateFileActivity extends AppCompatActivity {
                     btnMic.setImageDrawable(getDrawable(R.drawable.mic_off));
                     count = 0;
                     speechRecognizer.stopListening();
+                    btnMic.setVisibility(View.INVISIBLE);
                 }
             }
         });
@@ -251,7 +273,9 @@ public class CreateFileActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 document.close();
-                Toast.makeText(CreateFileActivity.this, "PDF File: "+mFilename, Toast.LENGTH_SHORT).show();
+                Toast.makeText(CreateFileActivity.this, "PDF File: "+filename, Toast.LENGTH_SHORT).show();
+                shareFile();
+                //UploadFile();
             }
         });
 
@@ -263,6 +287,104 @@ public class CreateFileActivity extends AppCompatActivity {
 
     }
 
+    private void shareFile() {
+        UploadFile();
+    }
+
+    private void UploadFile() {
+        Uri filepath = Uri.fromFile(new File(Environment.getExternalStorageDirectory().toString()+"/"+DIRECTORY_DOCUMENTS+"/"+filename));
+        if (filepath != null) {
+
+            Calendar cal = Calendar.getInstance();
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SS");
+            String strDate = sdf.format(cal.getTime());
+            System.out.println("Current date in String Format: "+strDate);
+
+
+
+
+            final ProgressDialog progressDialog = new ProgressDialog(this);
+            progressDialog.setTitle("Uploading...");
+            progressDialog.show();
+            StorageReference sref = storageReference.child(groupKey+"/"+filename);
+
+            sref.putFile(filepath)
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            progressDialog.dismiss();
+                            Toast.makeText(getApplicationContext(), "Uploaded Succesfully", Toast.LENGTH_SHORT).show();
+                            //groupInfo = new ArrayList<File>();
+                            //getFiles();
+                            Intent intent = new Intent(CreateFileActivity.this,GroupActivity.class);
+                            intent.putExtra("group_key",groupKey);
+                            intent.putExtra("group_name",groupName);
+                            startActivity(intent);
+                            Toast.makeText(CreateFileActivity.this, "XXXXX:"+groupKey+"  YYY "+groupName, Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(getApplicationContext(), "Failed", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
+                            double progress = (100.0 * taskSnapshot.getBytesTransferred() )/ taskSnapshot
+                                    .getTotalByteCount();
+                            progressDialog.setMessage("Uploaded " + (int) progress + "%");
+                        }
+                    });
+
+
+        }
+    }
+
+    private void setPdfName() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final EditText tv = new EditText(this);
+        tv.setHint("Enter pdf file name");
+        builder.setTitle("File name");
+        builder.setView(tv);
+        builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                pdfName.setText(tv.getText().toString());
+                openPdf();
+            }
+        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                pdfName.setText("unnamed");
+                openPdf();
+            }
+        });
+        builder.show();
+    }
+
+    private void openPdf() {
+        document = new Document();
+        String mFilename = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(System.currentTimeMillis());
+        File path = Environment.getExternalStoragePublicDirectory(DIRECTORY_DOCUMENTS);
+
+        filename = pdfName.getText().toString()+mFilename+".pdf";
+
+        File file = new File(path, filename);
+
+        try {
+            PdfWriter.getInstance(document,new FileOutputStream(file));
+
+        } catch (DocumentException e) {
+            Toast.makeText(this, "Document exception:"+e.getMessage(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            Toast.makeText(this, "File not found:"+e.getMessage(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+        document.open();
+    }
 
 
     private void showPopup(View view) {
@@ -287,6 +409,7 @@ public class CreateFileActivity extends AppCompatActivity {
                 showImageImportDialog();
                 return true;
             case R.id.scan_audio:
+                mPreviewIV.setVisibility(View.INVISIBLE);
                 dataFormat = "Text";
                 btnMic.setVisibility(View.VISIBLE);
                 return true;

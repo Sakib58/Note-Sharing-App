@@ -6,10 +6,31 @@
     tools:context=".ui.AnnouncementFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
+
+
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Write announcement"
+            android:id="@+id/et_write_announcement"
+            android:layout_marginTop="10dp"
+            />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="70dp"
+            android:text="Post Announcement"
+            android:layout_marginLeft="100dp"
+            android:id="@+id/btn_post_announcement"
+            />
+
+    <ListView
+        android:id="@+id/lv_post_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="Announcement Fragment"
-        android:gravity="center"/>
+        android:layout_marginTop="130dp"
+        />
+
 
 </FrameLayout>

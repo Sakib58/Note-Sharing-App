@@ -110,9 +110,6 @@ public class HomeFragment extends Fragment {
 
                     }
                     GroupListAdapter groupListAdapter = new GroupListAdapter(list,getContext());
-                    ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-                            getActivity(), android.R.layout.simple_list_item_1,groupNames
-                    );
 
                     listView.setAdapter(groupListAdapter);
                 }else {
