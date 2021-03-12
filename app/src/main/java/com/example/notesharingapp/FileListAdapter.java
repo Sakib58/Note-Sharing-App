@@ -1,8 +1,11 @@
 package com.example.notesharingapp;
 
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.DataSetObserver;
+import android.net.Uri;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,13 +14,17 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import java.util.ArrayList;
 
-public class GroupListAdapter implements ListAdapter {
-    ArrayList<Group> arrayList;
+import static android.os.Environment.DIRECTORY_DOWNLOADS;
+
+public class FileListAdapter implements ListAdapter {
+    ArrayList<File> arrayList;
     Context context;
 
-    public GroupListAdapter(ArrayList<Group> arrayList, Context context) {
+    public FileListAdapter(ArrayList<File> arrayList, Context context) {
         this.arrayList = arrayList;
         this.context = context;
     }
@@ -64,33 +71,38 @@ public class GroupListAdapter implements ListAdapter {
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
-        Group subjectData=arrayList.get(i);
+        File subjectData=arrayList.get(i);
         if(view==null) {
             LayoutInflater layoutInflater = LayoutInflater.from(context);
-            view=layoutInflater.inflate(R.layout.group, null);
+            view=layoutInflater.inflate(R.layout.file, null);
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                 }
             });
-            TextView tittle=view.findViewById(R.id.tv_group_title);
-            TextView description = view.findViewById(R.id.tv_group_description);
-            LinearLayout linearLayout = view.findViewById(R.id.ll_each_group);
-            tittle.setText(subjectData.getName());
-            description.setText(subjectData.getDescription());
-            linearLayout.setOnClickListener(new View.OnClickListener() {
+            TextView name=view.findViewById(R.id.tv_file_name);
+            FloatingActionButton link = view.findViewById(R.id.fab_file_link);
+            link.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Toast.makeText(context, subjectData.getKey()+" is clicked", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(context,GroupActivity.class);
-                    intent.putExtra("group_key",subjectData.getKey());
-                    intent.putExtra("group_name",subjectData.getName());
-                    context.startActivity(intent);
+                    downloadFile(view.getContext(),subjectData.getName(),DIRECTORY_DOWNLOADS,subjectData.getLink());
                 }
             });
+            LinearLayout linearLayout = view.findViewById(R.id.ll_each_file);
+            name.setText(subjectData.getName());
+
 
         }
         return view;
+    }
+
+    private void downloadFile(Context context,String filename, String destinationDirectory,String url) {
+        DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+        Uri uri = Uri.parse(url);
+        DownloadManager.Request request = new DownloadManager.Request(uri);
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        request.setDestinationInExternalFilesDir(context,destinationDirectory,filename);
+        downloadManager.enqueue(request);
     }
 
     @Override
