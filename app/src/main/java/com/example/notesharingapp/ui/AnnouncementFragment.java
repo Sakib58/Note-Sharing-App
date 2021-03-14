@@ -131,6 +131,7 @@ public class AnnouncementFragment extends Fragment {
                         }
                         PostListAdapter postListAdapter = new PostListAdapter(posts,getContext());
                         postView.setAdapter(postListAdapter);
+                        //getActivity().recreate();
                     }
                 });
 

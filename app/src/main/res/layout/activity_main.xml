@@ -28,6 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/et_password"
+        android:inputType="textPassword"
         android:hint="Enter password"
         android:layout_marginRight="20dp"
         android:layout_marginLeft="20dp"
